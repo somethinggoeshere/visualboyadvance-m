@@ -1,0 +1,42 @@
+#!/bin/sh
+
+set -e
+
+BUILD_ROOT=$HOME/vbam-build-unix
+
+DIST_CONFIGURE_OVERRIDES="
+    openssl     ./config no-shared --prefix=$BUILD_ROOT/root
+"
+
+. "$(dirname "$0")/../builder/core.sh"
+
+table_insert_before DISTS autoconf '
+    m4              https://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.xz                                                 bin/m4
+'
+
+table_insert_before DISTS glib '
+    python          https://www.python.org/ftp/python/2.7.14/Python-2.7.14.tar.xz                               bin/python
+'
+
+# have to build a large chunk of X11 on *nix
+table_insert_before DISTS sfml '
+    libpthread-stubs https://www.x.org/archive/individual/xcb/libpthread-stubs-0.4.tar.bz2                     lib/pkgconfig/pthread-stubs.pc
+    libXau          https://www.x.org/archive/individual/lib/libXau-1.0.8.tar.bz2                              lib/libXau.a
+    xcb-proto       https://www.x.org/archive/individual/xcb/xcb-proto-1.12.tar.bz2                            lib/pkgconfig/xcb-proto.pc
+    libxcb          https://www.x.org/archive/individual/xcb/libxcb-1.12.tar.bz2                               lib/libxcb.a
+    xproto          https://www.x.org/archive/individual/proto/xproto-7.0.31.tar.bz2                           include/X11/X.h
+    inputproto      https://www.x.org/archive/individual/proto/inputproto-2.3.2.tar.bz2                        include/X11/extensions/XI.h
+    xextproto       https://www.x.org/archive/individual/proto/xextproto-7.3.0.tar.bz2                         include/X11/extensions/shmproto.h
+    kbproto         https://www.x.org/archive/individual/proto/kbproto-1.0.7.tar.bz2                           include/X11/extensions/XKBsrv.h
+    xtrans          https://www.x.org/archive/individual/lib/xtrans-1.3.5.tar.bz2                              include/X11/Xtrans/Xtrans.h
+    libX11          https://www.x.org/archive/individual/lib/libX11-1.6.5.tar.bz2                              lib/libX11.a
+    randrproto      https://www.x.org/archive/individual/proto/randrproto-1.5.0.tar.bz2                        lib/pkgconfig/randrproto.pc
+    renderproto     https://www.x.org/archive/individual/proto/renderproto-0.11.tar.bz2                        lib/pkgconfig/renderproto.pc
+    libXext         https://www.x.org/archive/individual/lib/libXext-1.3.3.tar.bz2                             lib/libXext.a
+    libXrender      https://www.x.org/archive/individual/lib/libXrender-0.9.10.tar.bz2                         lib/libXrender.a
+    libXrandr       https://www.x.org/archive/individual/lib/libXrandr-1.5.1.tar.bz2                           lib/libXrandr.a
+'
+
+table_line_append DIST_ARGS glib '--disable-libmount'
+
+builder "$@"
